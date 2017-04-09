@@ -23,6 +23,12 @@ body{
 		background: #ef80ef;
 		position: relative;
 	}
+		#hoverView{
+			width: 100%;
+			height: 30%;
+			background: #0080ef;
+			position: relative;
+		}
 	#field_playerinfo_hands {
 		width: 70%;
 		height: 100%;

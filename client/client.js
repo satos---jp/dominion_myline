@@ -51,10 +51,18 @@ var Cardview = function () {
 				'class': 'name',
 				text: this.name
 			}));
-			this.elem.append($('<div>', {
-				'class': 'description',
-				text: this.description
-			}));
+
+			var desc = $('<div>', {
+				'class': 'description'
+			});
+			var ds = this.description.split('\n');
+			for (var i = 0; i < ds.length; i++) {
+				desc.append($('<div>', {
+					text: ds[i]
+				}));
+			}
+			this.elem.append(desc);
+
 			return this.elem;
 		}
 	}, {
@@ -120,7 +128,13 @@ var Client = function () {
 			$('#field').empty();
 			this.field = data.map(function (d) {
 				var x = new Cardview(d);
-				$('#field').append(x.drawInField());
+				var v = x.drawInField();
+
+				v.hover(function () {
+					$('#hoverView').empty();
+					$('#hoverView').append(new Cardview(x).drawInHand());
+				}, function () {});
+				$('#field').append(v);
 				return x;
 			});
 		}
