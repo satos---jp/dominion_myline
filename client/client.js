@@ -95,46 +95,26 @@ var Client = function () {
 		$('#ackbutton').on('click', function () {
 			socket.emit('ack');
 		});
-		socket.on('test', function () {
-			console.log('test data');
-		});
-		socket.on('test2', function (x) {
-			console.log('test data 2');
-			console.log(x);
-		});
 		socket.on('fielddata', function (data) {
 			console.log('getdata');
-			console.log(data);
 			_this.field = data.items;
 			_this.showField(_this.field);
 		});
-		socket.on('handdata', function (data) {
-			_this.showHands(data);
+		socket.on('playerdata', function (data) {
+			_this.showPlayer(data);
 		});
 
 		socket.on('choice_hand', function () {
 			console.log('choice_hand');
-			console.log(_this.hand);
 			_this.choiceFrom(_this.hand);
 		});
 		socket.on('choice_field', function () {
 			console.log('choice_field');
-			console.log(_this.field);
 			_this.choiceFrom(_this.field);
 		});
 	}
 
 	_createClass(Client, [{
-		key: 'showHands',
-		value: function showHands(data) {
-			$('#hands').empty();
-			this.hand = data.map(function (d) {
-				var x = new Cardview(d);
-				$('#hands').append(x.drawInHand(data.length));
-				return x;
-			});
-		}
-	}, {
 		key: 'showField',
 		value: function showField(data) {
 			$('#field').empty();
@@ -145,25 +125,56 @@ var Client = function () {
 			});
 		}
 	}, {
+		key: 'showPlayer',
+		value: function showPlayer(data) {
+			this.showHand(data["hand"]);
+			this.showStatus(data["status"]);
+		}
+	}, {
+		key: 'showHand',
+		value: function showHand(data) {
+			$('#hands').empty();
+			this.hand = data.map(function (d) {
+				var x = new Cardview(d);
+				$('#hands').append(x.drawInHand(data.length));
+				return x;
+			});
+		}
+	}, {
+		key: 'showStatus',
+		value: function showStatus(data) {
+			$('#playerinfo').empty();
+			$('#playerinfo').append($('<div>', {
+				text: "残りアクション数 :: " + data["actnum"] + "　　残り購入数 :: " + data["buynum"] + "　　残金 :: " + data["money"] + "　　"
+			}));
+		}
+	}, {
 		key: 'choiceFrom',
 		value: function choiceFrom(x) {
-			console.log(x);
+			var disablefunc = function disablefunc() {
+				for (var j = 0; j < x.length; j++) {
+					x[j].elem.off('mouseup');
+					x[j].emphasis(false);
+				}
+				$('#passbutton').off('mouseup');
+			};
 
 			var _loop = function _loop(i) {
 				var d = x[i];
 				d.emphasis(true);
 				d.elem.on('mouseup', function () {
 					socket.emit('choiced', d.name);
-					for (var j = 0; j < x.length; j++) {
-						x[j].elem.off('mouseup');
-						d.emphasis(false);
-					}
+					disablefunc();
 				});
 			};
 
 			for (var i = 0; i < x.length; i++) {
 				_loop(i);
 			}
+			$('#passbutton').on('mouseup', function () {
+				socket.emit('choiced', 'pass');
+				disablefunc();
+			});
 		}
 	}]);
 
