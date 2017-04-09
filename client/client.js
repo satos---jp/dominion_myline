@@ -1,4 +1,79 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+"use strict";
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var $ = require('jquery');
+
+var Cardview = function () {
+	function Cardview(x) {
+		_classCallCheck(this, Cardview);
+
+		this.name = x["name"];
+		this.cost = x["cost"];
+		this.effect = x["effect"];
+		this.vp = x["vp"];
+		this.type = x["type"];
+		this.num = x["num"];
+		this.description = x["description"];
+	}
+
+	_createClass(Cardview, [{
+		key: "drawInField",
+		value: function drawInField() {
+			this.elem = $('<div>', {
+				'class': 'fieldcard'
+			});
+			this.elem.append($('<div>', {
+				'class': 'name',
+				text: this.name
+			}));
+			this.elem.append($('<div>', {
+				'class': 'cost',
+				text: this.cost
+			}));
+			this.elem.append($('<div>', {
+				'class': 'num',
+				text: this.num
+			}));
+			return this.elem;
+		}
+	}, {
+		key: "drawInHand",
+		value: function drawInHand(num) {
+			this.elem = $('<div>', {
+				'class': 'handcard',
+				'width': 100 / num + '%'
+			});
+			this.elem.append($('<div>', {
+				'class': 'name',
+				text: this.name
+			}));
+			this.elem.append($('<div>', {
+				'class': 'description',
+				text: this.description
+			}));
+			return this.elem;
+		}
+	}, {
+		key: "emphasis",
+		value: function emphasis(b) {
+			if (b) {
+				this.elem.css('border', 'solid 2px red');
+			} else {
+				this.elem.css('border', 'none');
+			}
+		}
+	}]);
+
+	return Cardview;
+}();
+
+module.exports = Cardview;
+
+},{"jquery":31}],2:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -8,7 +83,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 var $ = require('jquery');
 var socket = require('socket.io-client')(); //これだけでserverのsocketと繋がるっぽい
 
-var Card = require('./../server/card');
+var Cardview = require('./cardview');
 
 var Client = function () {
 	function Client() {
@@ -34,14 +109,17 @@ var Client = function () {
 			_this.showField(_this.field);
 		});
 		socket.on('handdata', function (data) {
-			_this.hand = data;
 			_this.showHands(data);
 		});
 
 		socket.on('choice_hand', function () {
+			console.log('choice_hand');
+			console.log(_this.hand);
 			_this.choiceFrom(_this.hand);
 		});
 		socket.on('choice_field', function () {
+			console.log('choice_field');
+			console.log(_this.field);
 			_this.choiceFrom(_this.field);
 		});
 	}
@@ -50,33 +128,35 @@ var Client = function () {
 		key: 'showHands',
 		value: function showHands(data) {
 			$('#hands').empty();
-			for (var i = 0; i < data.length; i++) {
-				var d = new Card(data[i]);
-				console.log(d);
-				console.log(JSON.stringify(d));
-				$('#hands').append(d.drawInHands(data.length));
-			}
+			this.hand = data.map(function (d) {
+				var x = new Cardview(d);
+				$('#hands').append(x.drawInHand(data.length));
+				return x;
+			});
 		}
 	}, {
 		key: 'showField',
 		value: function showField(data) {
 			$('#field').empty();
-			for (var i = 0; i < data.length; i++) {
-				var d = new Card(data[i]);
-				console.log(d);
-				console.log(JSON.stringify(d));
-				$('#field').append(d.drawInField());
-			}
+			this.field = data.map(function (d) {
+				var x = new Cardview(d);
+				$('#field').append(x.drawInField());
+				return x;
+			});
 		}
 	}, {
 		key: 'choiceFrom',
 		value: function choiceFrom(x) {
+			console.log(x);
+
 			var _loop = function _loop(i) {
 				var d = x[i];
-				d.elem.attr('onclick', function () {
+				d.emphasis(true);
+				d.elem.on('mouseup', function () {
 					socket.emit('choiced', d.name);
-					for (var _i = 0; _i < x.length; _i++) {
-						x[_i].d.elem.attr('onclick', function () {});
+					for (var j = 0; j < x.length; j++) {
+						x[j].elem.off('mouseup');
+						d.emphasis(false);
 					}
 				});
 			};
@@ -94,101 +174,7 @@ $(document).ready(function () {
 	var cilent = new Client();
 });
 
-},{"./../server/card":2,"jquery":31,"socket.io-client":38}],2:[function(require,module,exports){
-"use strict";
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var $ = require('jquery');
-
-var Card = function () {
-	function Card(x) {
-		_classCallCheck(this, Card);
-
-		this.name = x["name"];
-		this.cost = x["cost"];
-		this.effect = x["effect"];
-		this.vp = x["vp"];
-		this.type = x["type"];
-
-		if (this.type === "money") {
-			this.money = x["money"];
-			this.num = 10000;
-		} else {
-			this.money = 0;
-			if (this.type === "vp") {
-				//�����A�l���ɂ����ĕς���
-				this.num = 12;
-			} else if (this.ispass()) {
-				this.num = 10000;
-			} else {
-				this.num = 10;
-			}
-		}
-
-		if (x["description"] === undefined) {
-			this.description = this.effect.toString();
-			this.description = "hoge";
-		}
-	}
-
-	_createClass(Card, [{
-		key: "action",
-		value: function action(self, others) {
-			this.effect(self, others);
-		}
-	}, {
-		key: "ispass",
-		value: function ispass() {
-			return this.name === "�p�X";
-		}
-	}, {
-		key: "drawInField",
-		value: function drawInField() {
-			this.elem = $('<div>', {
-				'class': 'fieldcard'
-			});
-			this.elem.append($('<div>', {
-				'class': 'name',
-				text: this.name
-			}));
-			this.elem.append($('<div>', {
-				'class': 'cost',
-				text: this.cost
-			}));
-			this.elem.append($('<div>', {
-				'class': 'num',
-				text: this.num
-			}));
-			return this.elem;
-		}
-	}, {
-		key: "drawInHands",
-		value: function drawInHands(num) {
-			this.elem = $('<div>', {
-				'class': 'handcard',
-				'width': 100 / num + '%'
-			});
-			this.elem.append($('<div>', {
-				'class': 'name',
-				text: this.name
-			}));
-			this.elem.append($('<div>', {
-				'class': 'description',
-				text: this.description
-			}));
-			return this.elem;
-		}
-	}]);
-
-	return Card;
-}();
-
-module.exports = Card;
-
-},{"jquery":31}],3:[function(require,module,exports){
+},{"./cardview":1,"jquery":31,"socket.io-client":38}],3:[function(require,module,exports){
 module.exports = after
 
 function after(count, callback, err_cb) {
@@ -18403,4 +18389,4 @@ yeast.encode = encode;
 yeast.decode = decode;
 module.exports = yeast;
 
-},{}]},{},[1]);
+},{}]},{},[2]);
