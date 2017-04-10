@@ -29,6 +29,27 @@ body{
 			background: #0080ef;
 			position: relative;
 		}
+		#logView{
+			width: 100%;
+			height: 15%;
+			background: #00efef;
+			position: relative;
+		}
+		#discardsView{
+			width: 100%;
+			height: 50%;
+			background: #ef8000;
+			position: relative;
+			display: flex;
+			flex-direction: row;
+			flex-wrap: wrap;
+		}
+			.discardcard {
+				width: 45%;
+				margin: 1px;
+				background: #00ef00;
+				position: relative;
+			}
 	#field_playerinfo_hands {
 		width: 70%;
 		height: 100%;
@@ -42,7 +63,6 @@ body{
 
 			display: flex;
 			flex-direction: row;
-			
 			flex-wrap: wrap;
 		}
 			.fieldcard {
@@ -74,7 +94,7 @@ body{
 		#button_playerinfo{
 			width 100%;
 			height: 8%;
-			background: #0080ef;
+			background: #00efef;
 			position: relative;
 			display: flex;
 			flex-direction: row;
@@ -87,7 +107,7 @@ body{
 		#hands {
 			width: 100%;
 			height: 25%;
-			background: #00efef;
+			background: #0080ef;
 			position: relative;
 			display: flex;
 			flex-direction: row;

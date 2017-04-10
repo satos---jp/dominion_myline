@@ -41,6 +41,17 @@ var Cardview = function () {
 			return this.elem;
 		}
 	}, {
+		key: "drawInDiscards",
+		value: function drawInDiscards(num) {
+			this.elem = $('<div>', {
+				'class': 'discardcard',
+				'height': 100 / Math.ceil((num - 0.5) / 2.0) + '%',
+				text: this.name
+			});
+
+			return this.elem;
+		}
+	}, {
 		key: "drawInHand",
 		value: function drawInHand(num) {
 			this.elem = $('<div>', {
@@ -103,6 +114,7 @@ var Client = function () {
 		$('#ackbutton').on('click', function () {
 			socket.emit('ack');
 		});
+
 		socket.on('fielddata', function (data) {
 			console.log('getdata');
 			_this.field = data.items;
@@ -110,6 +122,12 @@ var Client = function () {
 		});
 		socket.on('playerdata', function (data) {
 			_this.showPlayer(data);
+		});
+		socket.on('nowdiscards', function (data) {
+			_this.showDiscards(data);
+		});
+		socket.on('logdata', function (data) {
+			_this.showLog(data);
 		});
 
 		socket.on('choice_hand', function () {
@@ -155,12 +173,34 @@ var Client = function () {
 			});
 		}
 	}, {
+		key: 'showDiscards',
+		value: function showDiscards(data) {
+			$('#discardsView').empty();
+			data.map(function (d) {
+				var x = new Cardview(d);
+				$('#discardsView').append(x.drawInDiscards(data.length));
+			});
+		}
+	}, {
 		key: 'showStatus',
 		value: function showStatus(data) {
 			$('#playerinfo').empty();
 			$('#playerinfo').append($('<div>', {
 				text: "残りアクション数 :: " + data["actnum"] + "　　残り購入数 :: " + data["buynum"] + "　　残金 :: " + data["money"] + "　　"
 			}));
+		}
+	}, {
+		key: 'showLog',
+		value: function showLog(data) {
+			$('#logView').empty();
+			var color = 'black';
+			if (data["type"] === 'warn') color = 'red';else if (data["type"] === 'error') color = 'yellow';
+
+			var ne = $('<div>', {
+				text: data["type"] + " :: " + data["msg"]
+			});
+			ne.css('color', color);
+			$('#logView').append(ne);
 		}
 	}, {
 		key: 'choiceFrom',
