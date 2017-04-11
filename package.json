@@ -22,8 +22,7 @@
     "start": "node server.js",
     "pug": "pug index.pug --out client",
     "browserify": "browserify ./lib/client/client.js -t [ babelify --presets [ es2015 ] ] -o client/client.js",
-    "babel": "babel backend --presets es2015 --out-dir ./",
-    "build": "concurrently \"npm run babel\" \"npm run browserify\" \"npm run pug\"",
+    "build": "concurrently \"npm run browserify\" \"npm run pug\"",
     "postinstall": "npm run build"
   },
   "author": "",
