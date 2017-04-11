@@ -19,7 +19,7 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js",
+    "start": "node lib/server/server.js",
     "pug": "pug index.pug --out client",
     "browserify": "browserify ./lib/client/client.js -t [ babelify --presets [ es2015 ] ] -o client/client.js",
     "build": "concurrently \"npm run browserify\" \"npm run pug\"",
