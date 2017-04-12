@@ -112,7 +112,13 @@ var Client = function () {
 
 		console.log('constructing');
 		$('#ackbutton').on('click', function () {
-			socket.emit('ack');
+			var pnum = Number($('#ackform').val()) || -1;
+			socket.emit('ack', pnum);
+		});
+
+		socket.on('initRoomidx', function (idx) {
+			console.log('getRoomidx :: ' + idx);
+			_this.roomIdx = idx;
 		});
 
 		socket.on('fielddata', function (data) {
@@ -186,25 +192,44 @@ var Client = function () {
 		value: function showStatus(data) {
 			$('#playerinfo').empty();
 			$('#playerinfo').append($('<div>', {
+				text: "あなたは Player " + data.playeridx + " です :: ステータス " + data.status + "\n"
+			}));
+
+			$('#playerinfo').append($('<div>', {
 				text: "残りアクション数 :: " + data["actnum"] + "　　残り購入数 :: " + data["buynum"] + "　　残金 :: " + data["money"] + "　　"
 			}));
 		}
 	}, {
 		key: 'showLog',
 		value: function showLog(data) {
-			$('#logView').empty();
 			var color = 'black';
 			if (data["type"] === 'warn') color = 'red';else if (data["type"] === 'error') color = 'yellow';
 
-			var ne = $('<div>', {
-				text: data["type"] + " :: " + data["msg"]
-			});
-			ne.css('color', color);
-			$('#logView').append(ne);
+			var msg = data.msg;
+			if (msg.indexOf('\n') < 0) {
+				var ne = $('<div>', {
+					text: data["type"] + " :: " + msg
+				});
+				ne.css('color', color);
+				$('#logView').prepend(ne);
+			} else {
+				var msgs = msg.split('\n');
+				msgs.unshift(data["type"] + " :: ");
+				msgs.reverse();
+				msgs.forEach(function (s) {
+					var ne = $('<div>', {
+						text: s
+					});
+					ne.css('color', color);
+					$('#logView').prepend(ne);
+				});
+			}
 		}
 	}, {
 		key: 'choiceFrom',
 		value: function choiceFrom(x) {
+			var _this2 = this;
+
 			var disablefunc = function disablefunc() {
 				for (var j = 0; j < x.length; j++) {
 					x[j].elem.off('mouseup');
@@ -217,7 +242,7 @@ var Client = function () {
 				var d = x[i];
 				d.emphasis(true);
 				d.elem.on('mouseup', function () {
-					socket.emit('choiced', d.name);
+					_this2.send('choiced', d.name);
 					disablefunc();
 				});
 			};
@@ -226,9 +251,14 @@ var Client = function () {
 				_loop(i);
 			}
 			$('#passbutton').on('mouseup', function () {
-				socket.emit('choiced', 'pass');
+				_this2.send('choiced', 'pass');
 				disablefunc();
 			});
+		}
+	}, {
+		key: 'send',
+		value: function send(name, data) {
+			socket.emit(name, { data: data, idx: this.roomIdx });
 		}
 	}]);
 

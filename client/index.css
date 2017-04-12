@@ -23,6 +23,14 @@ body{
 		background: #ef80ef;
 		position: relative;
 	}
+		#ack_place{
+			width: 100%;
+			height: 5%;
+			background: #ef80ef;
+			position: relative;
+			display: flex;
+			flex-direction: row;
+		}
 		#hoverView{
 			width: 100%;
 			height: 30%;
@@ -31,13 +39,14 @@ body{
 		}
 		#logView{
 			width: 100%;
-			height: 15%;
+			height: 30%;
 			background: #00efef;
 			position: relative;
+			overflow-y: auto;
 		}
 		#discardsView{
 			width: 100%;
-			height: 50%;
+			height: 30%;
 			background: #ef8000;
 			position: relative;
 			display: flex;
@@ -100,8 +109,6 @@ body{
 			flex-direction: row;
 		}
 			#playerinfo{
-				display: flex;
-				flex-direction: row;
 			}
 		
 		#hands {
