@@ -144,6 +144,10 @@ var Client = function () {
 			console.log('choice_field');
 			_this.choiceFrom(_this.field);
 		});
+		socket.on('choice_option', function (ops) {
+			console.log('choice_option', ops);
+			_this.choiceOption(ops);
+		});
 	}
 
 	_createClass(Client, [{
@@ -182,7 +186,7 @@ var Client = function () {
 		key: 'showDiscards',
 		value: function showDiscards(data) {
 			$('#discardsView').empty();
-			data.map(function (d) {
+			data.forEach(function (d) {
 				var x = new Cardview(d);
 				$('#discardsView').append(x.drawInDiscards(data.length));
 			});
@@ -192,7 +196,7 @@ var Client = function () {
 		value: function showStatus(data) {
 			$('#playerinfo').empty();
 			$('#playerinfo').append($('<div>', {
-				text: "あなたは Player " + data.playeridx + " です :: ステータス " + data.status + "\n"
+				text: "Player " + data.playeridx + " :: status " + data.status + " :: 札 " + data.allmycardnum + "枚" + "\n"
 			}));
 
 			$('#playerinfo').append($('<div>', {
@@ -253,6 +257,27 @@ var Client = function () {
 			$('#passbutton').on('mouseup', function () {
 				_this2.send('choiced', 'pass');
 				disablefunc();
+			});
+		}
+	}, {
+		key: 'choiceOption',
+		value: function choiceOption(ops) {
+			var _this3 = this;
+
+			$('#passbutton').css('display', 'none');
+
+			$('#optionbuttons').empty();
+			ops.forEach(function (c) {
+				var ne = $('<input>', {
+					type: 'button',
+					value: c
+				});
+				ne.on('mouseup', function () {
+					_this3.send('choiced', c);
+					$('#optionbuttons').empty();
+					$('#passbutton').css('display', '');
+				});
+				$('#optionbuttons').append(ne);
 			});
 		}
 	}, {

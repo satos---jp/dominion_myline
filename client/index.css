@@ -110,6 +110,12 @@ body{
 		}
 			#playerinfo{
 			}
+			#optionbuttons{
+				height: 100%;
+				position: relative;
+				display: flex;
+				flex-direction: row;
+			}
 		
 		#hands {
 			width: 100%;
