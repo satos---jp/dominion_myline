@@ -36,7 +36,7 @@ var Cardview = function () {
 			}));
 			this.elem.append($('<div>', {
 				'class': 'num',
-				text: this.num
+				text: this.num < 1000 ? this.num : '∞'
 			}));
 			return this.elem;
 		}
@@ -82,7 +82,7 @@ var Cardview = function () {
 			if (b) {
 				this.elem.css('border', 'solid 2px red');
 			} else {
-				this.elem.css('border', 'none');
+				this.elem.css('border', 'solid 2px transparent');
 			}
 		}
 	}]);
@@ -114,6 +114,8 @@ var Client = function () {
 		$('#ackbutton').on('click', function () {
 			var pnum = Number($('#ackform').val()) || -1;
 			socket.emit('ack', pnum);
+			$('#ackbutton').css('display', 'none');
+			$('#ackform').css('display', 'none');
 		});
 
 		socket.on('initRoomidx', function (idx) {
@@ -196,11 +198,11 @@ var Client = function () {
 		value: function showStatus(data) {
 			$('#playerinfo').empty();
 			$('#playerinfo').append($('<div>', {
-				text: "Player " + data.playeridx + " :: status " + data.status + " :: 札 " + data.allmycardnum + "枚" + "\n"
+				text: "Player " + data.playeridx + " :: " + data.status + " ::  " + data.allmycardnum + "枚" + "\n"
 			}));
 
 			$('#playerinfo').append($('<div>', {
-				text: "残りアクション数 :: " + data["actnum"] + "　　残り購入数 :: " + data["buynum"] + "　　残金 :: " + data["money"] + "　　"
+				text: "action : " + data["actnum"] + "　　buy : " + data["buynum"] + "　　money : " + data["money"] + "　　"
 			}));
 		}
 	}, {
